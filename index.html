@@ -153,9 +153,9 @@ function showScreen(id){
 
 // ---- QUIZ ----
 const questions = [
-  { q:"Come si chiama il mio assistente AI?", opts:["Jarvis","Reginaldo","Alfredo","Siri"], correct:1, fun:"Reginaldo lo squalo 🦈" },
-  { q:"Qual è l'acronimo del mio corso?", opts:["CLEF","BEMACS","BIEF","CLEAM"], correct:1, fun:"BEMACS! Bachelor in Economics, Management and Computer Science 📚", type:"input", inputAnswer:"BEMACS" },
-  { q:"Come si chiama il PR della barca di quando ci siamo conosciuti?", opts:["Marco","Vito","Luca","Andrea"], correct:1, fun:"Vito! Come dimenticarlo 🚢" },
+  { q:"Come si chiama il mio assistente AI?", type:"input", inputAnswer:"Reginaldo", fun:"Reginaldo lo squalo 🦈" },
+  { q:"Qual è l'acronimo del mio corso?", type:"input", inputAnswer:"BEMACS", fun:"BEMACS! Bachelor in Economics, Management and Computer Science 📚" },
+  { q:"Come si chiama il PR della barca di quando ci siamo conosciuti?", type:"input", inputAnswer:"Vito", fun:"Vito! Come dimenticarlo 🚢" },
 ];
 
 let currentQ = 0, score = 0, quizLocked = false;

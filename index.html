@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>💝</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Georgia', serif; background: #1a0a0a; color: #fff; min-height:100vh; overflow-x:hidden; }
+
+/* Floating hearts background */
+.hearts-bg { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; overflow:hidden; }
+.heart-float { position:absolute; font-size:20px; opacity:0.15; animation: floatUp linear infinite; }
+@keyframes floatUp {
+  0% { transform: translateY(100vh) rotate(0deg); opacity:0; }
+  10% { opacity:0.15; }
+  90% { opacity:0.15; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity:0; }
+}
+
+/* Screens */
+.screen { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:20px; position:relative; z-index:1; text-align:center; }
+.screen.active { display:flex; }
+
+/* Intro */
+#intro h1 { font-size:2.5em; margin-bottom:10px; color:#ff6b8a; text-shadow: 0 0 30px rgba(255,107,138,0.5); }
+#intro p { font-size:1.2em; color:#ffb3c1; margin-bottom:30px; }
+.btn { background: linear-gradient(135deg, #ff6b8a, #ff3366); border:none; color:#fff; padding:15px 40px; font-size:1.1em; border-radius:50px; cursor:pointer; font-family:inherit; transition: all 0.3s; box-shadow: 0 5px 25px rgba(255,51,102,0.4); }
+.btn:hover { transform:scale(1.05); box-shadow: 0 8px 35px rgba(255,51,102,0.6); }
+.btn:active { transform:scale(0.98); }
+
+/* Quiz */
+#quiz h2 { font-size:1.8em; color:#ff6b8a; margin-bottom:5px; }
+#quiz-progress { color:#ffb3c1; margin-bottom:25px; font-size:0.9em; }
+#quiz-question { font-size:1.3em; margin-bottom:25px; max-width:500px; line-height:1.4; }
+.quiz-options { display:flex; flex-direction:column; gap:12px; width:100%; max-width:400px; }
+.quiz-opt { background: rgba(255,107,138,0.1); border:2px solid rgba(255,107,138,0.3); color:#fff; padding:14px 20px; font-size:1em; border-radius:15px; cursor:pointer; font-family:inherit; transition: all 0.3s; }
+.quiz-opt:hover { background: rgba(255,107,138,0.25); border-color:#ff6b8a; }
+.quiz-opt.correct { background: rgba(0,200,100,0.3); border-color:#00c864; animation: pulse 0.5s; }
+.quiz-opt.wrong { background: rgba(255,50,50,0.3); border-color:#ff3232; animation: shake 0.5s; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+#quiz-feedback { margin-top:15px; font-size:1.1em; min-height:30px; }
+
+/* Puzzle */
+#puzzle h2 { font-size:1.6em; color:#ff6b8a; margin-bottom:5px; }
+#puzzle-hint { color:#ffb3c1; margin-bottom:15px; font-size:0.95em; }
+#puzzle-moves { color:#ffb3c1; margin-bottom:10px; }
+#puzzle-container { display:grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr); gap:3px; width:min(85vw, 360px); height:min(85vw, 360px); background:#2a1a1a; border-radius:10px; padding:3px; box-shadow: 0 0 40px rgba(255,107,138,0.2); }
+.puzzle-tile { border-radius:6px; cursor:pointer; transition: transform 0.15s; background-size: 300% 300%; }
+.puzzle-tile:hover { transform:scale(0.96); }
+.puzzle-tile.empty { background:transparent !important; cursor:default; }
+
+/* Reveal */
+#reveal { background: radial-gradient(ellipse at center, #2a0a1a 0%, #1a0a0a 70%); }
+#reveal-photo { width:min(80vw, 320px); height:min(80vw, 320px); object-fit:cover; border-radius:20px; box-shadow: 0 10px 50px rgba(255,107,138,0.4); margin-bottom:25px; animation: revealIn 1s ease-out; }
+@keyframes revealIn { 0%{opacity:0;transform:scale(0.8) rotate(-5deg)} 100%{opacity:1;transform:scale(1) rotate(0)} }
+#reveal h1 { font-size:2.2em; color:#ff6b8a; margin-bottom:10px; animation: revealIn 1s ease-out 0.3s both; }
+#reveal .invite-text { font-size:1.15em; color:#ffb3c1; max-width:450px; line-height:1.6; animation: revealIn 1s ease-out 0.6s both; margin-bottom:8px; }
+#reveal .restaurant { font-size:1.3em; color:#fff; font-weight:bold; animation: revealIn 1s ease-out 0.9s both; margin-bottom:5px; }
+#reveal .details { color:#ffb3c1; font-size:1em; animation: revealIn 1s ease-out 1.1s both; }
+.confetti { position:fixed; top:-10px; font-size:24px; animation: confettiFall linear forwards; z-index:10; pointer-events:none; }
+@keyframes confettiFall { 0%{transform:translateY(-10vh) rotate(0)} 100%{transform:translateY(110vh) rotate(720deg)} }
+
+/* Score */
+#score-display { color:#ff6b8a; font-size:1.2em; margin:15px 0; }
+</style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<!-- INTRO -->
+<div class="screen active" id="intro">
+  <h1>💝 Ciao Alice</h1>
+  <p>Ho una sorpresa per te... ma prima devi guadagnartela 😏</p>
+  <button class="btn" onclick="startQuiz()">Accetto la sfida</button>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+  <h2>Quanto mi conosci? 🤔</h2>
+  <div id="quiz-progress"></div>
+  <div id="quiz-question"></div>
+  <div class="quiz-options" id="quiz-options"></div>
+  <div id="quiz-feedback"></div>
+</div>
+
+<!-- PUZZLE -->
+<div class="screen" id="puzzle">
+  <h2>Ora ricomponi il puzzle 🧩</h2>
+  <p id="puzzle-hint">Clicca le tessere vicine allo spazio vuoto</p>
+  <div id="puzzle-moves">Mosse: 0</div>
+  <div id="puzzle-container" id="puzzleGrid"></div>
+</div>
+
+<!-- VALENTINE ASK -->
+<div class="screen" id="valentine-ask">
+  <img id="ask-photo" style="width:min(70vw,280px);height:min(70vw,280px);object-fit:cover;border-radius:20px;box-shadow:0 10px 50px rgba(255,107,138,0.4);margin-bottom:25px;" />
+  <h1 style="font-size:2em;color:#ff6b8a;margin-bottom:20px;">Do you wanna be my Valentine? 💕</h1>
+  <div style="display:flex;gap:20px;position:relative;min-height:80px;align-items:center;">
+    <button class="btn" onclick="saidYes()" style="font-size:1.2em;padding:18px 50px;">Sì! 💖</button>
+    <button class="btn" id="noBtn" onmouseover="escapeNo()" onclick="escapeNo()" style="font-size:1.2em;padding:18px 50px;background:linear-gradient(135deg,#666,#444);box-shadow:0 5px 25px rgba(0,0,0,0.3);position:relative;">No 😤</button>
+  </div>
+</div>
+
+<!-- REVEAL -->
+<div class="screen" id="reveal">
+  <img id="reveal-photo" />
+  <h1>San Valentino 💕</h1>
+  <p class="invite-text">Lo sapevo 🥰</p>
+  <p class="invite-text">Ti porto a cena:</p>
+  <p class="restaurant">🍽 Macallè - Sapori dal Mare</p>
+  <p class="details">Francavilla al Mare · 14 Febbraio · Per due 🥂</p>
+  <div id="score-display"></div>
+</div>
+
+<script>
+const PHOTO_SRC = "photo.jpg";
+
+// Floating hearts
+(function(){
+  const emojis = ['💕','💗','💖','💝','❤️','🩷','✨'];
+  const bg = document.getElementById('heartsBg');
+  for(let i=0;i<25;i++){
+    const h = document.createElement('span');
+    h.className='heart-float';
+    h.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    h.style.left=Math.random()*100+'%';
+    h.style.animationDuration=(8+Math.random()*12)+'s';
+    h.style.animationDelay=Math.random()*15+'s';
+    h.style.fontSize=(14+Math.random()*18)+'px';
+    bg.appendChild(h);
+  }
+})();
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ---- QUIZ ----
+const questions = [
+  { q:"Qual è il mio linguaggio di programmazione preferito?", opts:["Python","TypeScript","Java","Rust"], correct:1, fun:"TypeScript con Effect, ovviamente 😤" },
+  { q:"A che età ho iniziato a lavorare come sviluppatore?", opts:["14","16","18","12"], correct:1, fun:"Sì, 16 anni. Nerd precoce 🤓" },
+  { q:"Come si chiama il mio assistente AI?", opts:["Jarvis","Reginaldo","Alfredo","Siri"], correct:1, fun:"Reginaldo lo squalo 🦈 (sì, è lui che ha fatto questa app)" },
+  { q:"Qual è l'acronimo del mio corso?", opts:["CLEF","BEMACS","BIEF","CLEAM"], correct:1, fun:"BEMACS! Bachelor in Economics, Management and Computer Science 📚", type:"input", inputAnswer:"BEMACS" },
+  { q:"Come si chiama il PR della barca di quando ci siamo conosciuti?", opts:["Marco","Vito","Luca","Andrea"], correct:1, fun:"Vito! Come dimenticarlo 🚢" },
+];
+
+let currentQ = 0, score = 0, quizLocked = false;
+
+function startQuiz(){ showScreen('quiz'); renderQuestion(); }
+
+function renderQuestion(){
+  if(currentQ >= questions.length){ quizDone(); return; }
+  const q = questions[currentQ];
+  document.getElementById('quiz-progress').textContent = `Domanda ${currentQ+1}/${questions.length}`;
+  document.getElementById('quiz-question').textContent = q.q;
+  document.getElementById('quiz-feedback').textContent = '';
+  const opts = document.getElementById('quiz-options');
+  opts.innerHTML='';
+  quizLocked=false;
+  if(q.type==='input'){
+    const input=document.createElement('input');
+    input.type='text';
+    input.className='quiz-opt';
+    input.style.textAlign='center';
+    input.placeholder='Scrivi qui...';
+    input.autocomplete='off';
+    const submitBtn=document.createElement('button');
+    submitBtn.className='btn';
+    submitBtn.style.marginTop='10px';
+    submitBtn.textContent='Conferma';
+    submitBtn.onclick=()=>pickInputAnswer(input,q);
+    input.onkeydown=(e)=>{ if(e.key==='Enter') submitBtn.click(); };
+    opts.appendChild(input);
+    opts.appendChild(submitBtn);
+    input.focus();
+    return;
+  }
+  // Shuffle display but track correct
+  const indices = [0,1,2,3].sort(()=>Math.random()-0.5);
+  indices.forEach(i=>{
+    const btn=document.createElement('button');
+    btn.className='quiz-opt';
+    btn.textContent=q.opts[i];
+    btn.onclick=()=>pickAnswer(btn,i);
+    opts.appendChild(btn);
+  });
+}
+
+function pickAnswer(btn,idx){
+  if(quizLocked) return;
+  quizLocked=true;
+  const q=questions[currentQ];
+  if(idx===q.correct){
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('quiz-feedback').textContent='✅ ' + q.fun;
+  } else {
+    btn.classList.add('wrong');
+    document.getElementById('quiz-feedback').textContent='❌ ' + q.fun;
+    // highlight correct
+    document.querySelectorAll('.quiz-opt').forEach((b,bi)=>{
+      // find the one with correct text
+      if(b.textContent===q.opts[q.correct]) b.classList.add('correct');
+    });
+  }
+  setTimeout(()=>{ currentQ++; renderQuestion(); }, 2200);
+}
+
+function pickInputAnswer(input,q){
+  if(quizLocked) return;
+  quizLocked=true;
+  const val=input.value.trim().toUpperCase();
+  if(val===q.inputAnswer.toUpperCase()){
+    input.classList.add('correct');
+    score++;
+    document.getElementById('quiz-feedback').textContent='✅ ' + q.fun;
+  } else {
+    input.classList.add('wrong');
+    document.getElementById('quiz-feedback').textContent='❌ ' + q.fun;
+  }
+  setTimeout(()=>{ currentQ++; renderQuestion(); }, 2200);
+}
+
+function quizDone(){ startPuzzle(); }
+
+// ---- PUZZLE ----
+let tiles=[], emptyIdx=8, moves=0;
+
+function startPuzzle(){
+  showScreen('puzzle');
+  moves=0;
+  // 0-7 = image tiles, 8 = empty
+  tiles=[0,1,2,3,4,5,6,7,8];
+  // shuffle (solvable)
+  do { shuffleTiles(); } while(!isSolvable(tiles) || isSolved());
+  renderPuzzle();
+}
+
+function shuffleTiles(){
+  for(let i=tiles.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [tiles[i],tiles[j]]=[tiles[j],tiles[i]];
+  }
+  emptyIdx=tiles.indexOf(8);
+}
+
+function isSolvable(arr){
+  let inv=0;
+  for(let i=0;i<arr.length;i++)
+    for(let j=i+1;j<arr.length;j++)
+      if(arr[i]!==8 && arr[j]!==8 && arr[i]>arr[j]) inv++;
+  const emptyRow = Math.floor(arr.indexOf(8)/3);
+  // 3x3: solvable if inversions even
+  return inv%2===0;
+}
+
+function isSolved(){ return tiles.every((t,i)=>t===i); }
+
+function renderPuzzle(){
+  const grid=document.getElementById('puzzle-container');
+  grid.innerHTML='';
+  document.getElementById('puzzle-moves').textContent=`Mosse: ${moves}`;
+  tiles.forEach((t,i)=>{
+    const div=document.createElement('div');
+    div.className='puzzle-tile'+(t===8?' empty':'');
+    if(t!==8){
+      const col=t%3, row=Math.floor(t/3);
+      div.style.backgroundImage=`url(${PHOTO_SRC})`;
+      div.style.backgroundPosition=`${col*50}% ${row*50}%`;
+    }
+    div.onclick=()=>clickTile(i);
+    grid.appendChild(div);
+  });
+}
+
+function clickTile(i){
+  const row=Math.floor(i/3), col=i%3;
+  const eRow=Math.floor(emptyIdx/3), eCol=emptyIdx%3;
+  if((Math.abs(row-eRow)+Math.abs(col-eCol))===1){
+    [tiles[i],tiles[emptyIdx]]=[tiles[emptyIdx],tiles[i]];
+    emptyIdx=i;
+    moves++;
+    renderPuzzle();
+    if(isSolved()) setTimeout(puzzleDone, 400);
+  }
+}
+
+function puzzleDone(){ showValentineAsk(); }
+
+function showValentineAsk(){
+  showScreen('valentine-ask');
+  document.getElementById('ask-photo').src=PHOTO_SRC;
+}
+
+function escapeNo(){
+  const btn=document.getElementById('noBtn');
+  const x=Math.random()*250-125;
+  const y=Math.random()*250-125;
+  btn.style.transform=`translate(${x}px,${y}px)`;
+}
+
+function saidYes(){ showReveal(); }
+
+// ---- REVEAL ----
+function showReveal(){
+  showScreen('reveal');
+  document.getElementById('reveal-photo').src=PHOTO_SRC;
+  document.getElementById('score-display').textContent=`Quiz: ${score}/${questions.length} · Puzzle: ${moves} mosse`;
+  launchConfetti();
+}
+
+function launchConfetti(){
+  const emojis=['🎉','💕','✨','🥂','💖','🩷','❤️','🌹'];
+  for(let i=0;i<40;i++){
+    setTimeout(()=>{
+      const c=document.createElement('span');
+      c.className='confetti';
+      c.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      c.style.left=Math.random()*100+'%';
+      c.style.animationDuration=(2+Math.random()*3)+'s';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),5000);
+    }, i*100);
+  }
+}
+</script>
+</body>
+</html>

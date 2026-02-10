@@ -303,11 +303,9 @@ function showHelpModal(){ document.getElementById('help-modal').style.display='f
 function closeHelpModal(){ document.getElementById('help-modal').style.display='none'; }
 function useHelp(){
   closeHelpModal();
-  // Solve all but 2-3 tiles
-  const solved=[0,1,2,3,4,5,6,7,8];
-  // Leave last row scrambled: swap positions 6 and 7
-  tiles=[0,1,2,3,4,5,7,6,8];
-  emptyIdx=8;
+  // Almost solved: only 1 move needed (tile 7 next to empty)
+  tiles=[0,1,2,3,4,5,6,8,7];
+  emptyIdx=7;
   moves+=1;
   renderPuzzle();
 }

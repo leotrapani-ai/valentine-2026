@@ -111,7 +111,7 @@ body { font-family: 'Georgia', serif; background: #1a0a0a; color: #fff; min-heig
   <img id="ask-photo" style="width:min(70vw,280px);height:min(70vw,280px);object-fit:cover;border-radius:20px;box-shadow:0 10px 50px rgba(255,107,138,0.4);margin-bottom:25px;" />
   <h1 style="font-size:2em;color:#ff6b8a;margin-bottom:20px;">Do you wanna be my Valentine? 💕</h1>
   <div style="display:flex;gap:20px;position:relative;min-height:80px;align-items:center;">
-    <button class="btn" onclick="saidYes()" style="font-size:1.2em;padding:18px 50px;">Sì! 💖</button>
+    <button class="btn" id="yesBtn" onclick="saidYes()" style="font-size:1.2em;padding:18px 50px;display:none;">Sì! 💖</button>
     <button class="btn" id="noBtn" onmouseover="escapeNo()" onclick="escapeNo()" style="font-size:1.2em;padding:18px 50px;background:linear-gradient(135deg,#666,#444);box-shadow:0 5px 25px rgba(0,0,0,0.3);position:relative;">No 😤</button>
   </div>
 </div>
@@ -319,6 +319,7 @@ function escapeNo(){
   const x=Math.random()*250-125;
   const y=Math.random()*250-125;
   btn.style.transform=`translate(${x}px,${y}px)`;
+  document.getElementById('yesBtn').style.display='inline-block';
 }
 
 function saidYes(){ showReveal(); }
